@@ -12,4 +12,5 @@ yum install htop tmux git -y
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 #change grub background
+chmod u+x $DIR"change_GRUB2_background/change_GRUB2_background.sh"
 $DIR"change_GRUB2_background/change_GRUB2_background.sh"
