@@ -1,0 +1,199 @@
+//------------------------------------------------
+//--- 010 Editor v10.0 Binary Template
+//
+//      File: MBR.bt
+//   Authors: Jordan Kimball
+//   Version: 1.2
+//   Purpose: Decodes MBR records
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//     Notes: There is probibally a better way to 
+//            write this but this works and im to
+//            lazy to rewrite it :P
+//------------------------------------------------
+
+
+typedef struct (int64 offset) {
+    //local uint64 offset = offset;
+    byte Bootable <format=hex, fgcolor=cRed, comment=isbootable, name="Bootable Flag">;
+    byte chs_start[3] <format=binary, fgcolor=cGreen, name="Start CHS Bytes ">;
+    local ushort start_cyl =(uchar)chs_start[1]/64*256+(uchar)chs_start[2];
+    local ushort start_head = (uchar)chs_start[0];
+    local ushort start_sector =(uchar)chs_start[1]%64;
+    byte type <fgcolor=cLtBlue, comment=get_type, name="Partition Type">;
+    byte chs_end[3] <format=binary, fgcolor=cLtGreen, name="End CHS Bytes ">;
+    local ushort end_cyl =(uchar)chs_end[1]/64*256+(uchar)chs_end[2];
+    local ushort end_head = (uchar)chs_end[0];
+    local ushort end_sector =(uchar)chs_end[1]%64;
+    uint start_sector <fgcolor=cDkYellow, name="Start Sector">;
+    local uint64 start_sector_bytes = start_sector*512;
+    local uint64 start_sector_absolute = start_sector + offset/512;
+    local uint64 start_sector_absolute_bytes =start_sector_absolute*512;
+    uint part_size<fgcolor=cPurple, name="Partiton Size (Sectors)">;
+    local uint64 part_size_bytes = part_size*512;
+} MBR_Partition ;
+
+string isbootable (byte b){
+    if(b == 0x80){
+         return "Yes";
+    }
+    else {
+        return "No";
+    }
+}
+
+string get_type (byte b){
+    switch(b){
+        case 0x00 : return "Empty";
+        case 0x01 : return "FAT12";
+        case 0x04 : return "FAT16 <32M";
+        case 0x05 : return "Extended";
+        case 0x06 : return "FAT16";
+        case 0x07 : return "HPFS/NTFS";
+        case 0x0B : return "FAT32";
+        case 0x0C : return "FAT32 LB";
+        case 0x0D : return "FAT16 LB";
+        case 0x82 : return "Linux swap";
+        case 0x83 : return "Linux";
+        default   : return "Unknown";
+    }
+}
+string get_type2 (struct p){
+    switch(p.type){
+        case 0x00 : return "Empty";
+        case 0x01 : return "FAT12";
+        case 0x04 : return "FAT16 <32M";
+        case 0x05 : return "Extended";
+        case 0x06 : return "FAT16";
+        case 0x07 : return "HPFS/NTFS";
+        case 0x0B : return "FAT32";
+        case 0x0C : return "FAT32 LB";
+        case 0x0D : return "FAT16 LB";
+        case 0x82 : return "Linux swap";
+        case 0x83 : return "Linux";
+        default   : return "Unknown";
+    }
+}
+
+void ParseMBR(int64 offset, int64 part_offset){
+    
+    FSeek(offset + part_offset+ 446);
+
+    SetBackColor(0x6f7554);
+    FSkip(0x04);
+    byte skip1<hidden=true>;
+    FSkip(-0x05);
+    if(skip1 == 0x00){
+        MBR_Partition part1(offset+ part_offset)<hidden=true>;
+    }else if (skip1==0x05){
+        MBR_Partition part1(offset+ part_offset)<comment="Extended", name="Partiton Entry 1 ">;
+    }else{
+        MBR_Partition part1(offset+ part_offset)<name="Partiton Entry 1 ">;
+    }
+
+    SetBackColor(0x597554);
+    FSkip(0x04);
+    byte skip2<hidden=true>;;
+    FSkip(-0x05);
+    if(skip2 == 0x00){
+        MBR_Partition part2(offset+ part_offset)<hidden=true>;
+    }else if (skip2==0x05){
+        MBR_Partition part2(offset+ part_offset)<comment="Extended", name="Partiton Entry 2 ">;
+    }else{
+        MBR_Partition part2(offset+ part_offset)<name="Partiton Entry 2 ">;
+    }
+
+    SetBackColor(0x547568);
+    FSkip(0x04);
+    byte skip3 <hidden=true>;
+    FSkip(-0x05);
+    if(skip3 == 0x00){
+        MBR_Partition part3(offset+ part_offset)<hidden=true>;
+    }else if (skip3==0x05){
+        MBR_Partition part3(offset+ part_offset)<comment="Extended", name="Partiton Entry 3 ">;
+    }else{
+        MBR_Partition part3(offset+ part_offset)<name="Partiton Entry 3 ">;
+    }
+
+    
+    SetBackColor(0x547275);
+    FSkip(0x04);
+    byte skip4<hidden=true>;
+    FSkip(-0x05);
+    if(skip4 == 0x00){
+        MBR_Partition part4(offset+ part_offset)<hidden=true>;
+    }else if (skip4==0x05){
+        MBR_Partition part4(offset+ part_offset)<comment="Extended", name="Partiton Entry 4 ">;
+    }else{
+        MBR_Partition part4(offset+ part_offset)<name="Partiton Entry 4 ">;
+    }
+
+    SetBackColor(cNone);
+    if(part1.type==5){ParseMBR(offset,part1.start_sector_bytes);}
+    if(part2.type==5){ParseMBR(offset,part2.start_sector_bytes);}
+    if(part3.type==5){ParseMBR(offset,part3.start_sector_bytes);}
+    if(part4.type==5){ParseMBR(offset,part4.start_sector_bytes);}
+}
+
+
+LittleEndian();
+
+FSeek(440);
+uint Disk_sig <bgcolor=cLtRed>;
+FSeek(446);
+
+SetBackColor(0x6f7554);
+FSkip(0x04);
+byte skip1<hidden=true>;
+FSkip(-0x05);
+if(skip1 == 0x00){
+    MBR_Partition part1(0)<hidden=true>;
+}else if (skip1==0x05){
+    MBR_Partition part1(0)<comment="Extended", name="Partiton Entry 1 ">;
+}else{
+    MBR_Partition part1(0)<name="Partiton Entry 1 ">;
+}
+
+SetBackColor(0x597554);
+FSkip(0x04);
+byte skip2<hidden=true>;;
+FSkip(-0x05);
+if(skip2 == 0x00){
+    MBR_Partition part2(0)<hidden=true>;
+}else if (skip2==0x05){
+    MBR_Partition part2(0)<comment="Extended", name="Partiton Entry 2 ">;
+}else{
+    MBR_Partition part2(0)<name="Partiton Entry 2 ">;
+}
+
+SetBackColor(0x547568);
+FSkip(0x04);
+byte skip3 <hidden=true>;
+FSkip(-0x05);
+if(skip3 == 0x00){
+    MBR_Partition part3(0)<hidden=true>;
+}else if (skip3==0x05){
+    MBR_Partition part3(0)<comment="Extended", name="Partiton Entry 3 ">;
+}else{
+    MBR_Partition part3(0)<name="Partiton Entry 3 ">;
+}
+
+SetBackColor(0x547275);
+FSkip(0x04);
+byte skip4<hidden=true>;
+FSkip(-0x05);
+if(skip4 == 0x00){
+    MBR_Partition part4(0)<hidden=true>;
+}else if (skip4==0x05){
+    MBR_Partition part4(0)<comment="Extended", name="Partiton Entry 4 ">;
+}else{
+    MBR_Partition part4(0)<name="Partiton Entry 4 ">;
+}
+
+SetBackColor(cNone);
+if(part1.type==5){ParseMBR(part1.start_sector_bytes,0);}
+if(part2.type==5){ParseMBR(part2.start_sector_bytes,0);}
+if(part3.type==5){ParseMBR(part3.start_sector_bytes,0);}
+if(part4.type==5){ParseMBR(part4.start_sector_bytes,0);}
