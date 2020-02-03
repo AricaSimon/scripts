@@ -1,0 +1,59 @@
+//------------------------------------------------
+//--- 010 Editor v10.0 Binary Template
+//
+//      File: GPT.bt
+//   Authors: Jordan Kimball
+//   Version: 1.0
+//   Purpose: Decodes GPT Table 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History:
+//------------------------------------------------
+
+typedef struct{
+    char signature[8];
+    uint revision;
+    uint header_size;
+    uint crc32;
+    uint reserved;
+    uint64 current_lba;
+    uint64 backup_lba;
+    uint64 first_usable_lba;
+    uint64 last_usable_lba;
+    byte disk_guid[16];
+    uint64 lba_partiton_entry_array;
+    uint total_partition_slots;
+    uint size_partition_slot;
+    uint crc32_partition_arrayl;
+    byte reserved2[420];
+} GPT_Header;
+
+typedef struct{
+    byte part1[4] <format=hex>;
+    byte part2[2] <format=hex>;
+    byte part3[2] <format=hex>;
+    byte part4[2] <format=hex>;
+    byte part5[6] <format=hex>;
+    //Printf("%X %X %X %X",part1[3],part1[2],part1[1],part1[0]);
+    //local string GUID +=""+part1[3]+part1[2]+part1[1]+part1[0];
+} GUID;
+
+typedef struct {
+    GUID part_type_guid;
+    byte part_unique_guid[16];
+    uint64 start_lba;
+    uint64 end_lba;
+    uint64 attributes;
+    //defines unicode string
+    wchar_t name[36];
+    
+} GPT_Partition_Entry;
+
+
+
+LittleEndian();
+FSeek(512);
+GPT_Header header;
+GPT_Partition_Entry parts[128];
+
