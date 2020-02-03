@@ -13,6 +13,7 @@
 //            write this but this works and im to
 //            lazy to rewrite it :P
 //------------------------------------------------
+local int64 volume_used_space = 0;
 
 
 typedef struct (int64 offset) {
@@ -33,6 +34,9 @@ typedef struct (int64 offset) {
     local uint64 start_sector_absolute_bytes =start_sector_absolute*512;
     uint part_size<fgcolor=cPurple, name="Partiton Size (Sectors)">;
     local uint64 part_size_bytes = part_size*512;
+    if (type != 0x05){
+        volume_used_space += part_size_bytes;
+    }
 } MBR_Partition ;
 
 string isbootable (byte b){
@@ -78,7 +82,7 @@ string get_type2 (struct p){
 }
 
 void ParseMBR(int64 offset, int64 part_offset){
-    
+    volume_used_space +=512;
     FSeek(offset + part_offset+ 446);
 
     SetBackColor(0x6f7554);
@@ -143,6 +147,7 @@ LittleEndian();
 FSeek(440);
 uint Disk_sig <bgcolor=cLtRed>;
 FSeek(446);
+volume_used_space +=512;
 
 SetBackColor(0x6f7554);
 FSkip(0x04);
@@ -197,3 +202,14 @@ if(part1.type==5){ParseMBR(part1.start_sector_bytes,0);}
 if(part2.type==5){ParseMBR(part2.start_sector_bytes,0);}
 if(part3.type==5){ParseMBR(part3.start_sector_bytes,0);}
 if(part4.type==5){ParseMBR(part4.start_sector_bytes,0);}
+
+FSeek(FileSize()-512);
+string end;
+local int64 file_size = FileSize();
+if(end=="conectix"){
+    file_size-= 512;
+}
+
+SetBackColor(cRed);
+FSkip(512);
+local int64 wasted_space = file_size - volume_used_space;
