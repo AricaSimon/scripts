@@ -10,6 +10,18 @@
 //  ID Bytes: 
 //   History:
 //------------------------------------------------
+typedef struct{
+    LittleEndian();
+    byte part1[4] <format=hex>;
+    byte part2[2] <format=hex>;
+    byte part3[2] <format=hex>;
+    BigEndian();
+    byte part4[2] <format=hex>;
+    byte part5[6] <format=hex>;
+    //Printf("%X %X %X %X",part1[3],part1[2],part1[1],part1[0]);
+    //local string GUID +=""+part1[3]+part1[2]+part1[1]+part1[0];
+    LittleEndian();
+} GUID;
 
 typedef struct{
     char signature[8]<fgcolor=cLtRed>;
@@ -21,7 +33,7 @@ typedef struct{
     uint64 backup_lba<fgcolor=cLtRed>;
     uint64 first_usable_lba<fgcolor=cLtGreen>;
     uint64 last_usable_lba<fgcolor=cLtBlue>;
-    byte disk_guid[16]<fgcolor=cAqua>;
+    GUID disk_guid<fgcolor=cAqua>;
     uint64 lba_partiton_entry_array<fgcolor=cLtPurple>;
     uint total_partition_slots<fgcolor=cLtYellow>;
     uint size_partition_slot<fgcolor=cLtRed>;
@@ -29,21 +41,14 @@ typedef struct{
     byte reserved2[420]<fgcolor=cLtBlue>;
 } GPT_Header;
 
-typedef struct{
-    byte part1[4] <format=hex>;
-    byte part2[2] <format=hex>;
-    byte part3[2] <format=hex>;
-    byte part4[2] <format=hex>;
-    byte part5[6] <format=hex>;
-    //Printf("%X %X %X %X",part1[3],part1[2],part1[1],part1[0]);
-    //local string GUID +=""+part1[3]+part1[2]+part1[1]+part1[0];
-} GUID;
+
 
 typedef struct {
     GUID part_type_guid<fgcolor=cLtRed>;
-    byte part_unique_guid[16]<fgcolor=cLtGreen>;
+    GUID part_unique_guid<fgcolor=cLtGreen>;
     uint64 start_lba<fgcolor=cLtBlue>;
     uint64 end_lba<fgcolor=cLtPurple>;
+    local uint64 size = end_lba-start_lba-1;
     uint64 attributes<fgcolor=cLtYellow>;
     //defines unicode string
     wchar_t name[36]<fgcolor=cAqua>;
