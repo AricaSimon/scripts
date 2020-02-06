@@ -12,21 +12,21 @@
 //------------------------------------------------
 
 typedef struct{
-    char signature[8];
-    uint revision;
-    uint header_size;
-    uint crc32;
-    uint reserved;
-    uint64 current_lba;
-    uint64 backup_lba;
-    uint64 first_usable_lba;
-    uint64 last_usable_lba;
-    byte disk_guid[16];
-    uint64 lba_partiton_entry_array;
-    uint total_partition_slots;
-    uint size_partition_slot;
-    uint crc32_partition_arrayl;
-    byte reserved2[420];
+    char signature[8]<fgcolor=cLtRed>;
+    uint revision<fgcolor=cLtGreen>;
+    uint header_size<fgcolor=cLtBlue>;
+    uint crc32<fgcolor=cAqua>;
+    uint reserved<fgcolor=cLtPurple>;
+    uint64 current_lba<fgcolor=cLtYellow>;
+    uint64 backup_lba<fgcolor=cLtRed>;
+    uint64 first_usable_lba<fgcolor=cLtGreen>;
+    uint64 last_usable_lba<fgcolor=cLtBlue>;
+    byte disk_guid[16]<fgcolor=cAqua>;
+    uint64 lba_partiton_entry_array<fgcolor=cLtPurple>;
+    uint total_partition_slots<fgcolor=cLtYellow>;
+    uint size_partition_slot<fgcolor=cLtRed>;
+    uint crc32_partition_arrayl<fgcolor=cLtGreen>;
+    byte reserved2[420]<fgcolor=cLtBlue>;
 } GPT_Header;
 
 typedef struct{
@@ -40,13 +40,13 @@ typedef struct{
 } GUID;
 
 typedef struct {
-    GUID part_type_guid;
-    byte part_unique_guid[16];
-    uint64 start_lba;
-    uint64 end_lba;
-    uint64 attributes;
+    GUID part_type_guid<fgcolor=cLtRed>;
+    byte part_unique_guid[16]<fgcolor=cLtGreen>;
+    uint64 start_lba<fgcolor=cLtBlue>;
+    uint64 end_lba<fgcolor=cLtPurple>;
+    uint64 attributes<fgcolor=cLtYellow>;
     //defines unicode string
-    wchar_t name[36];
+    wchar_t name[36]<fgcolor=cAqua>;
     
 } GPT_Partition_Entry;
 
@@ -54,6 +54,20 @@ typedef struct {
 
 LittleEndian();
 FSeek(512);
-GPT_Header header;
-GPT_Partition_Entry parts[128];
+GPT_Header header<bgcolor=0xA0A0A0>;
+local int i=0;
+//010 editor doesnt support an array of strings :/
+local int colors[6]={0x000080, 0x008000,0x800080,0x808000,0x008080,0x404040};
+for(i=0;i<128 ;i++){
+    int64 temp <hidden=true>;
+    if(temp==0){
+        FSkip(120);
+    }else{
+        FSkip(-8);
+        SetBackColor(colors[i%6]);
+        GPT_Partition_Entry part;
+    }
+    SetBackColor(0xffffffff);
+} 
+//GPT_Partition_Entry parts[128];
 
