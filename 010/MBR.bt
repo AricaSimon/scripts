@@ -15,44 +15,18 @@
 //------------------------------------------------
 
 typedef struct{
-    local string part1_s;
-    local string s;
-    local string temp = "";
-
-    byte part1[4] <format=hex>;
-    SPrintf(temp,"%X", part1[3]);
-    part1_s+=SubStr(temp,6);
-    temp="";
-    SPrintf(temp,"%X", part1[2]);
-    part1_s+=SubStr(temp,6);
-    temp="";
-    SPrintf(temp,"%X", part1[1]);
-    part1_s+=SubStr(temp,6);
-    temp="";
-    SPrintf(temp,"%X", part1[0]);
-    part1_s+=SubStr(temp,6);
-    temp="";
-    s+="-";
-
-    byte part2[2] <format=hex>;
-    SPrintf(temp,"%X", part2[1]);
-    s+=SubStr(temp,6);
-    SPrintf(temp,"%X", part2[0]);
-    s+=SubStr(temp,6);
-    s+="-";
-
-    byte part3[2] <format=hex>;
-    SPrintf(temp,"%X", part3[1]);
-    s+=SubStr(temp,6);
-    SPrintf(temp,"%X", part3[0]);
-    s+=SubStr(temp,6);
-
-    
-    byte part4[2] <format=hex>;
-    byte part5[6] <format=hex>;
-    //Printf("%X %X %X %X",part1[3],part1[2],part1[1],part1[0]);
-    //local string GUID +=""+part1[3]+part1[2]+part1[1]+part1[0];
+    uint part1 <format=hex,hidden=true>;
+    Printf("%X hex number",part1);
+    ushort part2 <format=hex,hidden=true>;
+    ushort part3 <format=hex,hidden=true>;
+    BigEndian();    
+    ushort part4 <format=hex,hidden=true>;
+    //combined b/c no 6 byte variable type
+    uint part5_1 <format=hex,hidden=true>;
+    ushort part5_2 <format=hex,hidden=true>;
     LittleEndian();
+    local string GUID;
+    SPrintf(GUID,"%X-%X-%X-%X-%X%X",part1,part2,part3,part4,part5_1,part5_2);
 } GUID;
 
 typedef struct{
