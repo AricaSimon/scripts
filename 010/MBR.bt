@@ -61,12 +61,6 @@ typedef struct {
     
 } GPT_Partition_Entry;
 
-typedef string F_GPT <read=F_GPT_READ, write=F_GPT_WRITE>;
-
-string F_GPT_READ(byte b[]){
-    //SPrintf
-}
-
 void readGPT(int offset){
     LittleEndian();
     FSeek(offset);
@@ -86,7 +80,6 @@ void readGPT(int offset){
         SetBackColor(0xffffffff);
     } 
 }
-
 
 
 local int64 volume_used_space = 0;

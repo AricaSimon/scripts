@@ -11,16 +11,18 @@
 //   History:
 //------------------------------------------------
 typedef struct{
+    uint part1 <format=hex,hidden=true>;
+    Printf("%X hex number",part1);
+    ushort part2 <format=hex,hidden=true>;
+    ushort part3 <format=hex,hidden=true>;
+    BigEndian();    
+    ushort part4 <format=hex,hidden=true>;
+    //combined b/c no 6 byte variable type
+    uint part5_1 <format=hex,hidden=true>;
+    ushort part5_2 <format=hex,hidden=true>;
     LittleEndian();
-    byte part1[4] <format=hex>;
-    byte part2[2] <format=hex>;
-    byte part3[2] <format=hex>;
-    BigEndian();
-    byte part4[2] <format=hex>;
-    byte part5[6] <format=hex>;
-    //Printf("%X %X %X %X",part1[3],part1[2],part1[1],part1[0]);
-    //local string GUID +=""+part1[3]+part1[2]+part1[1]+part1[0];
-    LittleEndian();
+    local string GUID;
+    SPrintf(GUID,"%X-%X-%X-%X-%X%X",part1,part2,part3,part4,part5_1,part5_2);
 } GUID;
 
 typedef struct{
@@ -48,31 +50,34 @@ typedef struct {
     GUID part_unique_guid<fgcolor=cLtGreen>;
     uint64 start_lba<fgcolor=cLtBlue>;
     uint64 end_lba<fgcolor=cLtPurple>;
-    local uint64 size = end_lba-start_lba-1;
+    local uint64 size = end_lba-start_lba+1;
     uint64 attributes<fgcolor=cLtYellow>;
     //defines unicode string
     wchar_t name[36]<fgcolor=cAqua>;
     
 } GPT_Partition_Entry;
 
+void readGPT(int offset){
+    LittleEndian();
+    FSeek(offset);
+    GPT_Header header<bgcolor=0xA0A0A0,name="GPT Header">;
+    local int i=0;
+    //010 editor doesnt support an array of strings :/
+    local int colors[6]={0x000080, 0x008000,0x800080,0x808000,0x008080,0x404040};
+    for(i=0;i<128 ;i++){
+        int64 temp <hidden=true>;
+        if(temp==0){
+            FSkip(120);
+        }else{
+            FSkip(-8);
+            SetBackColor(colors[i%6]);
+            GPT_Partition_Entry part;
+        }
+        SetBackColor(0xffffffff);
+    } 
+}
 
+readGPT(512);
 
-LittleEndian();
-FSeek(512);
-GPT_Header header<bgcolor=0xA0A0A0>;
-local int i=0;
-//010 editor doesnt support an array of strings :/
-local int colors[6]={0x000080, 0x008000,0x800080,0x808000,0x008080,0x404040};
-for(i=0;i<128 ;i++){
-    int64 temp <hidden=true>;
-    if(temp==0){
-        FSkip(120);
-    }else{
-        FSkip(-8);
-        SetBackColor(colors[i%6]);
-        GPT_Partition_Entry part;
-    }
-    SetBackColor(0xffffffff);
-} 
 //GPT_Partition_Entry parts[128];
 
