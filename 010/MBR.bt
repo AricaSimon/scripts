@@ -26,6 +26,7 @@ typedef struct{
     ushort part5_2 <format=hex,hidden=true>;
     LittleEndian();
     local string GUID;
+    //add zero padding 
     SPrintf(GUID,"%X-%X-%X-%X-%X%X",part1,part2,part3,part4,part5_1,part5_2);
 } GUID;
 
@@ -55,6 +56,7 @@ typedef struct {
     uint64 start_lba<fgcolor=cLtBlue>;
     uint64 end_lba<fgcolor=cLtPurple>;
     local uint64 size = end_lba-start_lba+1;
+    local uint64 size_bytes = size*512;
     uint64 attributes<fgcolor=cLtYellow>;
     //defines unicode string
     wchar_t name[36]<fgcolor=cAqua>;
