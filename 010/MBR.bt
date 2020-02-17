@@ -81,6 +81,31 @@ void readGPT(int offset){
         }
         SetBackColor(0xffffffff);
     } 
+
+    readBackupGPT(header.backup_lba*512);
+}
+
+void readBackupGPT(int64 offset){
+    FSeek(offset);
+    FSkip(-16384);
+    local int i=0;
+    //010 editor doesnt support an array of strings :/
+    local int colors[6]={0x000080, 0x008000,0x800080,0x808000,0x008080,0x404040};
+    for(i=0;i<128 ;i++){
+        int64 temp <hidden=true>;
+        if(temp==0){
+            FSkip(120);
+        }else{
+            FSkip(-8);
+            SetBackColor(colors[i%6]);
+            GPT_Partition_Entry backup_part;
+        }
+        SetBackColor(0xffffffff);
+    } 
+    LittleEndian();
+    FSeek(offset);
+    GPT_Header backup_header<bgcolor=0xA0A0A0,name="Backup GPT Header">;
+
 }
 
 
