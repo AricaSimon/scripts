@@ -27,7 +27,7 @@ typedef struct{
     LittleEndian();
     local string GUID;
     //add zero padding 
-    SPrintf(GUID,"%X-%X-%X-%X-%X%X",part1,part2,part3,part4,part5_1,part5_2);
+    SPrintf(GUID,"%08X-%04X-%04X-%04X-%08X%04X",part1,part2,part3,part4,part5_1,part5_2);
 } GUID;
 
 typedef struct{
