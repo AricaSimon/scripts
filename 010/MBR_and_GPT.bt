@@ -15,6 +15,21 @@
 //------------------------------------------------
 
 
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////  Settings  /////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+// 0 does not parse FAT, 1 parses FAT
+local int RUN_FAT = 1;
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////  END SETTINGS  ////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+
 local int64 volume_used_space = 0;
 
 local int64 fat[128];
@@ -31,9 +46,11 @@ int get_first_empty(int64 arr[]){
     }
 }
 
-/////////////////////////////////////
-///////////////  GPT  ///////////////
-/////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////  GPT  ////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 
 // GUID
 typedef struct{
@@ -136,9 +153,10 @@ void readBackupGPT(int64 offset){
 
 }
 
-/////////////////////////////////////
-///////////////  MBR  ///////////////
-/////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////  MBR  ////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 
 // MBR Partition
 typedef struct (int64 offset) {
@@ -164,7 +182,7 @@ typedef struct (int64 offset) {
     }
 
     //FAT
-    if (type==0x01 || type==0x04){
+    if (type==0x01 || type==0x04 || type==0x06){
         fat_ext[get_first_empty(fat_ext)]=start_sector_absolute_bytes;
     }
 } MBR_Partition ;
@@ -282,26 +300,26 @@ void ParseMBR(int64 offset, int64 part_offset){
     if(part4.type==0xee){readGPT(offset+part4.start_sector_bytes);}
 }
 
-/////////////////////////////////////
-///////////////  FAT  ///////////////
-/////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////  FAT  ////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 typedef struct 
 {
-    unsigned char       bootjmp[3];
-    char                oem_name[8];
-    unsigned short          bytes_per_sector;
-    unsigned char       sectors_per_cluster;
-    unsigned short      reserved_sector_count;
-    unsigned char       table_count;
-    unsigned short      root_entry_count;
-    unsigned short      total_sectors_16;
-    unsigned char       media_type;
-    unsigned short      table_size_16;
-    unsigned short      sectors_per_track;
-    unsigned short      head_side_count;
-    unsigned int        hidden_sector_count;
-    unsigned int        total_sectors_32;
+    unsigned char       bootjmp[3]<fgcolor=cLtRed>;
+    char                oem_name[8]<fgcolor=cLtGreen>;
+    unsigned short      bytes_per_sector<fgcolor=cLtBlue>;
+    unsigned char       sectors_per_cluster<fgcolor=cAqua>;
+    unsigned short      reserved_sector_count<fgcolor=cLtPurple>;
+    unsigned char       table_count<fgcolor=cLtYellow>;
+    unsigned short      root_entry_count<fgcolor=cLtRed>;
+    unsigned short      total_sectors_16<fgcolor=cLtGreen>;
+    unsigned char       media_type<fgcolor=cLtBlue>;
+    unsigned short      table_size_16<fgcolor=cAqua>;
+    unsigned short      sectors_per_track<fgcolor=cLtPurple>;
+    unsigned short      head_side_count<fgcolor=cLtYellow>;
+    unsigned int        hidden_sector_count<fgcolor=cLtRed>;
+    unsigned int        total_sectors_32<fgcolor=cLtGreen>;
 }fat_BS;
 
 typedef struct 
@@ -316,12 +334,12 @@ typedef struct
  
 }fat_extBS_16;
 
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////  RUN  ////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 LittleEndian();
 ParseMBR(0,0);
-
-/////////////////////////////////////
-///////////////  RUN  ///////////////
-/////////////////////////////////////
 
 FSeek(FileSize()-512);
 string end;
@@ -342,20 +360,23 @@ LittleEndian();
 //fat_BS fbs;
 //fat_extBS_16 fbs_ext;
 
-local int num_fat=get_first_empty(fat_ext);
+// RUN FAT
+if (RUN_FAT==1){
+    local int num_fat=get_first_empty(fat);
 
-local int i=0;
-for(i=0;i<num_fat;i++){
-    FSeek(fat_ext[i]);
-    fat_BS fbs;
-}
+    local int i=0;
+    for(i=0;i<num_fat;i++){
+        FSeek(fat_ext[i]);
+        fat_BS fbs;
+    }
 
 
-local int num_fat_ext=get_first_empty(fat_ext);
+    local int num_fat_ext=get_first_empty(fat_ext);
 
-local int i=0;
-for(i=0;i<num_fat_ext;i++){
-    FSeek(fat_ext[i]);
-    fat_BS fbs;
-    fat_extBS_16 fbs_ext; 
+    i=0;
+    for(i=0;i<num_fat_ext;i++){
+        FSeek(fat_ext[i]);
+        fat_BS fbs;
+        fat_extBS_16 fbs_ext; 
+    }
 }
